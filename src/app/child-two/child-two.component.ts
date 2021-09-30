@@ -11,51 +11,35 @@ import {
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-parent',
+  selector: 'app-child-two',
   template: `
     <div [formGroup]="form">
-      <label>
-        <input type="checkbox" formControlName="childFormType">
-        {{ childFormType ? 'Type 1' : 'Type 2' }}
-      </label>
-
-      <div [ngSwitch]="childFormType">
-        <app-child-one *ngSwitchCase="true"></app-child-one>
-        
-        <div *ngSwitchCase="false">
-          All good
-        </div>
-      </div>
+      <label>Color:</label>
+      <input formGroupName="color" />
     </div>
-
-    <pre>form.value: {{ form.value | json }}</pre>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
       multi: true,
-      useExisting: ParentComponent,
+      useExisting: ChildTwoComponent,
     },
     {
       provide: NG_VALIDATORS,
       multi: true,
-      useExisting: ParentComponent,
+      useExisting: ChildTwoComponent,
     },
   ],
 })
-export class ParentComponent
+export class ChildTwoComponent
   implements ControlValueAccessor, OnDestroy, Validator
 {
   constructor(private fb: FormBuilder) {}
 
   form = this.fb.group({
-    childFormType: this.fb.control(true, Validators.required),
+    color: this.fb.control('', Validators.required),
   });
-
-  get childFormType(): boolean {
-    return this.form.controls['childFormType'].value;
-  }
 
   private onTouched: () => void;
   private onChangeSubs: Subscription[] = [];
@@ -66,11 +50,11 @@ export class ParentComponent
     }
   }
 
-  writeValue(model: any): void {
-    this.form.patchValue(model, { emitEvent: false });
+  writeValue(childTwo: { color: string }): void {
+    this.form.patchValue(childTwo, { emitEvent: false });
   }
 
-  registerOnChange(onChange: (model: any) => void): void {
+  registerOnChange(onChange: (childTwo: { color: string }) => void): void {
     this.onChangeSubs.push(this.form.valueChanges.subscribe(onChange));
   }
 
