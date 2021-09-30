@@ -14,8 +14,8 @@ import { Subscription } from 'rxjs';
   selector: 'app-child-one',
   template: `
     <div [formGroup]="form">
-      <label>Some Input</label>
-      <input formControlName="input" />
+      <label>Name:</label>
+      <input formControlName="name" />
 
       <div formArrayName="items">
         <div *ngFor="let control of items.controls; let i = index">

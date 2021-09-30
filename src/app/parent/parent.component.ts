@@ -20,15 +20,13 @@ import { Subscription } from 'rxjs';
       </label>
 
       <div [ngSwitch]="childFormType">
-        <app-child-one *ngSwitchCase="true"></app-child-one>
+        <app-child-one *ngSwitchCase="true" formGroupName="childOne"></app-child-one>
         
         <div *ngSwitchCase="false">
           All good
         </div>
       </div>
     </div>
-
-    <pre>form.value: {{ form.value | json }}</pre>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -51,6 +49,7 @@ export class ParentComponent
 
   form = this.fb.group({
     childFormType: this.fb.control(true, Validators.required),
+    childOne: this.fb.group({}),
   });
 
   get childFormType(): boolean {

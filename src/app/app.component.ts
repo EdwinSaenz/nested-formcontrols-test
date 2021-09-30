@@ -6,12 +6,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  model = {
-    input: 'Aaron was here',
-    items: [
-      {
-        color: 'Blue',
-      },
-    ],
-  };
+  model = {};
 }
