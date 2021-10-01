@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FormBuilder, FormArray, FormGroup } from '@angular/forms';
+import { FormBuilder, FormArray, FormGroup, Validators } from '@angular/forms';
 import { SubForm, SUB_FORM_CONTAINER } from '../directives';
 
 @Component({
@@ -30,7 +30,7 @@ export class ChildOneComponent implements SubForm {
   constructor(private fb: FormBuilder) {}
 
   form = this.fb.group({
-    name: this.fb.control(''),
+    name: this.fb.control('', Validators.required),
     items: this.fb.array([]),
   });
 

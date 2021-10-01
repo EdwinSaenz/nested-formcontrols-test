@@ -7,7 +7,7 @@ import { SubForm, SUB_FORM_CONTAINER } from '../directives';
   template: `
     <div [formGroup]="form">
       <label>
-        <input type="checkbox" formControlName="childFormType">
+        <input type="checkbox" appSubForm="childFormType">
         {{ childFormType ? 'Type 1' : 'Type 2' }}
       </label>
 
