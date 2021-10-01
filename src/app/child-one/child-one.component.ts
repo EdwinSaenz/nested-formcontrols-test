@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import {
   FormBuilder,
   FormArray,
@@ -7,6 +12,8 @@ import {
   ControlValueAccessor,
   Validator,
   ValidationErrors,
+  ControlContainer,
+  FormGroup,
 } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -27,23 +34,14 @@ import { Subscription } from 'rxjs';
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      multi: true,
-      useExisting: ChildOneComponent,
-    },
-    {
-      provide: NG_VALIDATORS,
-      multi: true,
-      useExisting: ChildOneComponent,
-    },
-  ],
 })
 export class ChildOneComponent
-  implements ControlValueAccessor, OnDestroy, Validator
+  implements ControlValueAccessor, OnInit, OnDestroy, Validator
 {
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private controlContainer: ControlContainer
+  ) {}
 
   form = this.fb.group({
     name: this.fb.control(''),
@@ -61,6 +59,16 @@ export class ChildOneComponent
   private onTouched: () => void;
   private onChangeSubs: Subscription[] = [];
 
+  ngOnInit(): void {
+    const formGroup = this.controlContainer.control as FormGroup;
+    if (!formGroup.addControl) {
+      return;
+    }
+
+    formGroup.addControl('name', this.form.controls['name']);
+    formGroup.addControl('items', this.form.controls['items']);
+  }
+
   ngOnDestroy(): void {
     for (const sub of this.onChangeSubs) {
       sub.unsubscribe();
@@ -72,7 +80,7 @@ export class ChildOneComponent
   }
 
   registerOnChange(
-    onChange: (childTwo: { input: string; items: { color: string }[] }) => void
+    onChange: (childOne: { input: string; items: { color: string }[] }) => void
   ): void {
     this.onChangeSubs.push(this.form.valueChanges.subscribe(onChange));
   }

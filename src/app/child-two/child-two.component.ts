@@ -1,7 +1,14 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
+import {
+  ControlContainer,
   ControlValueAccessor,
   FormBuilder,
+  FormGroup,
   NG_VALIDATORS,
   NG_VALUE_ACCESSOR,
   ValidationErrors,
@@ -19,23 +26,14 @@ import { Subscription } from 'rxjs';
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      multi: true,
-      useExisting: ChildTwoComponent,
-    },
-    {
-      provide: NG_VALIDATORS,
-      multi: true,
-      useExisting: ChildTwoComponent,
-    },
-  ],
 })
 export class ChildTwoComponent
-  implements ControlValueAccessor, OnDestroy, Validator
+  implements ControlValueAccessor, OnInit, OnDestroy, Validator
 {
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private controlContainer: ControlContainer
+  ) {}
 
   form = this.fb.group({
     color: this.fb.control('', Validators.required),
@@ -43,6 +41,15 @@ export class ChildTwoComponent
 
   private onTouched: () => void;
   private onChangeSubs: Subscription[] = [];
+
+  ngOnInit(): void {
+    const formGroup = this.controlContainer.control as FormGroup;
+    if (!formGroup.addControl) {
+      return;
+    }
+
+    formGroup.addControl('color', this.form.controls['color']);
+  }
 
   ngOnDestroy(): void {
     for (const sub of this.onChangeSubs) {

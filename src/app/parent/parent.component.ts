@@ -23,7 +23,7 @@ import { Subscription } from 'rxjs';
         <app-child-one *ngSwitchCase="true" formGroupName="childOne"></app-child-one>
         
         <div *ngSwitchCase="false">
-          All good
+          ✅ All good
         </div>
       </div>
     </div>
