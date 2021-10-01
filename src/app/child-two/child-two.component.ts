@@ -22,7 +22,7 @@ import { Subscription } from 'rxjs';
   template: `
     <div [formGroup]="form">
       <label>Color:</label>
-      <input formGroupName="color" />
+      <input appSubForm="color" />
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -22,11 +22,11 @@ import { Subscription } from 'rxjs';
   template: `
     <div [formGroup]="form">
       <label>Name:</label>
-      <input formControlName="name" />
+      <input appSubForm="name" />
 
       <div formArrayName="items">
         <div *ngFor="let control of items.controls; let i = index">
-          <app-child-two [formGroupName]="i"></app-child-two>
+          <app-child-two [appSubForm]="i"></app-child-two>
         </div>
       </div>
 

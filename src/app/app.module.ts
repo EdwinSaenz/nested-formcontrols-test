@@ -7,6 +7,7 @@ import { AppComponent } from './app.component';
 import { ParentComponent } from './parent/parent.component';
 import { ChildOneComponent } from './child-one';
 import { ChildTwoComponent } from './child-two';
+import { SubFormDirective } from './directives';
 
 @NgModule({
   imports: [BrowserModule, CommonModule, FormsModule, ReactiveFormsModule],
@@ -15,6 +16,7 @@ import { ChildTwoComponent } from './child-two';
     ParentComponent,
     ChildOneComponent,
     ChildTwoComponent,
+    SubFormDirective,
   ],
   bootstrap: [AppComponent],
 })

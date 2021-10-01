@@ -20,7 +20,7 @@ import { Subscription } from 'rxjs';
       </label>
 
       <div [ngSwitch]="childFormType">
-        <app-child-one *ngSwitchCase="true" formGroupName="childOne"></app-child-one>
+        <app-child-one *ngSwitchCase="true" appSubForm="childOne"></app-child-one>
         
         <div *ngSwitchCase="false">
           ✅ All good
