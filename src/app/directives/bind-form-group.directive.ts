@@ -1,22 +1,23 @@
-import { Directive, Inject, InjectionToken, Input } from '@angular/core';
+import { Directive, Inject, InjectionToken, Input } from "@angular/core";
 import {
   AbstractControl,
   ControlContainer,
   FormArray,
   FormGroup,
-} from '@angular/forms';
+} from "@angular/forms";
 
-export const SUB_FORM_CONTAINER = new InjectionToken('SUB_FORM_CONTAINER');
+export const SUB_FORM_CONTAINER = new InjectionToken("SUB_FORM_CONTAINER");
 
 export abstract class SubForm {
   public abstract getSubForm(): AbstractControl;
 }
 
 @Directive({
-  selector: '[appSubForm]',
+  selector: "[appSubForm]",
 })
 export class SubFormDirective<T extends SubForm> {
-  @Input('appSubForm') appSubForm: string | number;
+  @Input("appSubForm")
+  formName!: string | number;
 
   constructor(
     private cc: ControlContainer,
@@ -24,16 +25,29 @@ export class SubFormDirective<T extends SubForm> {
   ) {}
 
   ngOnInit() {
-    if ((this.cc.control as FormGroup).addControl) {
-      (this.cc.control as FormGroup).addControl(
-        this.appSubForm as string,
-        this.groupContainer.getSubForm()
-      );
-    } else {
-      (this.cc.control as FormArray).insert(
-        this.appSubForm as number,
+    if (this.isFormGroup(this.cc.control)) {
+      if (!this.cc.control.contains(this.formName as string)) {
+        this.cc.control.addControl(
+          this.formName as string,
+          this.groupContainer.getSubForm()
+        );
+      }
+    }
+
+    if (this.isFormArray(this.cc.control)) {
+      this.cc.control.removeAt(this.formName as number);
+      this.cc.control.insert(
+        this.formName as number,
         this.groupContainer.getSubForm()
       );
     }
+  }
+
+  private isFormGroup(control: AbstractControl | null): control is FormGroup {
+    return !!(control as FormGroup).addControl;
+  }
+
+  private isFormArray(control: AbstractControl | null): control is FormArray {
+    return !!(control as FormArray).insert;
   }
 }

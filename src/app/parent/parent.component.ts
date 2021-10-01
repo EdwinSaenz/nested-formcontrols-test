@@ -1,46 +1,84 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
-import { SubForm, SUB_FORM_CONTAINER } from '../directives';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ComponentFactoryResolver,
+  ViewChild,
+  ViewContainerRef,
+} from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { pairwise, startWith } from "rxjs/operators";
+import { ChildFormBase } from "../child-form";
+import { ChildOneComponent } from "../child-one";
+import { ChildTwoComponent } from "../child-two";
 
 @Component({
-  selector: 'app-parent',
+  selector: "app-parent",
   template: `
     <div [formGroup]="form">
       <label>
-        <input type="checkbox" appSubForm="childFormType">
-        {{ childFormType ? 'Type 1' : 'Type 2' }}
+        <input type="checkbox" formControlName="childFormType" />
+        {{ childFormType ? "Type 1" : "Type 2" }}
       </label>
 
-      <div [ngSwitch]="childFormType">
-        <app-child-one *ngSwitchCase="true" appSubForm="childOne"></app-child-one>
-        
-        <div *ngSwitchCase="false">
-          ✅ All good
-        </div>
-      </div>
+      <div #childContainer></div>
     </div>
+
+    <pre>value: {{ form.value | json }}</pre>
+    <pre>valid: {{ form.valid | json }}</pre>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: SUB_FORM_CONTAINER,
-      useExisting: ParentComponent,
-    },
-  ],
 })
-export class ParentComponent implements SubForm {
-  constructor(private fb: FormBuilder) {}
+export class ParentComponent implements ChildFormBase {
+  constructor(
+    private fb: FormBuilder,
+    private componentFactoryResolver: ComponentFactoryResolver
+  ) {}
+
+  @ViewChild("childContainer", { read: ViewContainerRef, static: true })
+  childContainer!: ViewContainerRef;
 
   form = this.fb.group({
     childFormType: this.fb.control(true, Validators.required),
-    childOne: this.fb.group({}),
   });
 
   get childFormType(): boolean {
-    return this.form.controls['childFormType'].value;
+    return this.form.controls["childFormType"].value;
   }
 
-  public getSubForm(): AbstractControl {
+  get childForm(): FormGroup {
     return this.form;
+  }
+
+  private childComponents: {
+    [type: string]: { formName: string; component: any };
+  } = {
+    true: { formName: "childOne", component: ChildOneComponent },
+    false: { formName: "childTwo", component: ChildTwoComponent },
+  };
+
+  ngOnInit(): void {
+    this.form.controls["childFormType"].valueChanges
+      .pipe(startWith(null, this.childFormType), pairwise())
+      .subscribe(([previousType, newType]) => {
+        const { component, formName } = this.childComponents[`${newType}`];
+
+        const factoryInstance =
+          this.componentFactoryResolver.resolveComponentFactory<ChildFormBase>(
+            component
+          );
+
+        const childComponent =
+          this.childContainer.createComponent<ChildFormBase>(factoryInstance);
+
+        const childForm = childComponent.instance.childForm;
+
+        this.form.addControl(formName, childForm as FormGroup);
+
+        if (previousType !== null) {
+          const { formName: oldForm } = this.childComponents[`${previousType}`];
+          this.childContainer.remove(0);
+          this.form.removeControl(oldForm);
+        }
+      });
   }
 }

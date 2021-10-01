@@ -1,9 +1,14 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SubForm, SUB_FORM_CONTAINER } from '../directives';
+import { ChangeDetectionStrategy, Component } from "@angular/core";
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from "@angular/forms";
+import { ChildFormBase } from "../child-form";
 
 @Component({
-  selector: 'app-child-two',
+  selector: "app-child-two",
   template: `
     <div [formGroup]="form">
       <label>Color:</label>
@@ -11,21 +16,19 @@ import { SubForm, SUB_FORM_CONTAINER } from '../directives';
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: SUB_FORM_CONTAINER,
-      useExisting: ChildTwoComponent,
-    },
-  ],
 })
-export class ChildTwoComponent implements SubForm {
+export class ChildTwoComponent implements ChildFormBase {
   constructor(private fb: FormBuilder) {}
 
   form = this.fb.group({
-    color: this.fb.control('', Validators.required),
+    color: this.fb.control("", Validators.required),
   });
 
-  getSubForm(): FormGroup {
+  public get childForm(): FormGroup {
+    return this.form;
+  }
+
+  getSubForm(): AbstractControl {
     return this.form;
   }
 }
