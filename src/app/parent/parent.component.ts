@@ -1,14 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import {
-  ControlValueAccessor,
-  FormBuilder,
-  NG_VALIDATORS,
-  NG_VALUE_ACCESSOR,
-  ValidationErrors,
-  Validator,
-  Validators,
-} from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
+import { SubForm, SUB_FORM_CONTAINER } from '../directives';
 
 @Component({
   selector: 'app-parent',
@@ -31,20 +23,12 @@ import { Subscription } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
-      provide: NG_VALUE_ACCESSOR,
-      multi: true,
-      useExisting: ParentComponent,
-    },
-    {
-      provide: NG_VALIDATORS,
-      multi: true,
+      provide: SUB_FORM_CONTAINER,
       useExisting: ParentComponent,
     },
   ],
 })
-export class ParentComponent
-  implements ControlValueAccessor, OnDestroy, Validator
-{
+export class ParentComponent implements SubForm {
   constructor(private fb: FormBuilder) {}
 
   form = this.fb.group({
@@ -56,36 +40,7 @@ export class ParentComponent
     return this.form.controls['childFormType'].value;
   }
 
-  private onTouched: () => void;
-  private onChangeSubs: Subscription[] = [];
-
-  ngOnDestroy(): void {
-    for (const sub of this.onChangeSubs) {
-      sub.unsubscribe();
-    }
-  }
-
-  writeValue(model: any): void {
-    this.form.patchValue(model, { emitEvent: false });
-  }
-
-  registerOnChange(onChange: (model: any) => void): void {
-    this.onChangeSubs.push(this.form.valueChanges.subscribe(onChange));
-  }
-
-  registerOnTouched(onTouched: () => void): void {
-    this.onTouched = onTouched;
-  }
-
-  setDisabledState?(isDisabled: boolean): void {
-    this.form[['enable', 'disable'][+isDisabled]]();
-  }
-
-  validate(): ValidationErrors {
-    if (this.form.valid) {
-      return null;
-    }
-
-    return this.form.errors;
+  public getSubForm(): AbstractControl {
+    return this.form;
   }
 }
