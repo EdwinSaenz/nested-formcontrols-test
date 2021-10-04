@@ -50,17 +50,19 @@ export class ParentComponent implements ChildFormBase {
   }
 
   private childComponents: {
-    [type: string]: { formName: string; component: any };
+    [type: string]: { component: any };
   } = {
-    true: { formName: "childOne", component: ChildOneComponent },
-    false: { formName: "childTwo", component: ChildTwoComponent },
+    true: { component: ChildOneComponent },
+    false: { component: ChildTwoComponent },
   };
 
   ngOnInit(): void {
     this.form.controls["childFormType"].valueChanges
-      .pipe(startWith(null, this.childFormType), pairwise())
-      .subscribe(([previousType, newType]) => {
-        const { component, formName } = this.childComponents[`${newType}`];
+      .pipe(startWith(this.childFormType))
+      .subscribe((newType) => {
+        this.childContainer.clear();
+
+        const { component } = this.childComponents[`${newType}`];
 
         const factoryInstance =
           this.componentFactoryResolver.resolveComponentFactory<ChildFormBase>(
@@ -72,12 +74,16 @@ export class ParentComponent implements ChildFormBase {
 
         const childForm = childComponent.instance.childForm;
 
-        this.form.addControl(formName, childForm as FormGroup);
+        for (const control in this.form.controls) {
+          if (control === "childFormType") {
+            continue;
+          }
 
-        if (previousType !== null) {
-          const { formName: oldForm } = this.childComponents[`${previousType}`];
-          this.childContainer.remove(0);
-          this.form.removeControl(oldForm);
+          this.form.removeControl(control);
+        }
+
+        for (const control in childForm.controls) {
+          this.form.addControl(control, childForm.controls[control]);
         }
       });
   }
